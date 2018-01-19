@@ -1,6 +1,8 @@
 #include <SPI.h>
 #include <SD.h>
 #include <Wire.h>
+#include <RTCZero.h>
+#include <Adafruit_SI1145.h>
 
 // Set the pins used
 #define cardSelect 4
@@ -8,7 +10,6 @@
 // A simple data logger for the Arduino analog pins
 #define LOG_INTERVAL  1000 // mills between entries
 #define ECHO_TO_SERIAL   1 // echo data to serial port
-#define WAIT_TO_START    0 // Wait for serial input in setup()
 
 // the digital pins that connect to the LEDs
 #define redLED 13
@@ -22,9 +23,18 @@
 // create text array with desired number of characters
 char filename[15];
 
+
+// create logging file object
 File logfile;
 
-// blink out an error code
+// create real time clock object
+RTCZero rtc;    // Create RTC object
+
+// create uv object
+Adafruit_SI1145 uv = Adafruit_SI1145();
+
+
+// blinks out the same number of red LED flashes as the error number, then pauses
 void error(uint8_t errno) {
   while(1) {
     uint8_t i;
@@ -35,7 +45,7 @@ void error(uint8_t errno) {
       delay(100);
     }
     for (i=errno; i<10; i++) {
-      delay(200);
+      delay(500);
     }
   }
 }
@@ -43,6 +53,25 @@ void error(uint8_t errno) {
 
 
 void setup() {
+
+  // Start the RTC
+  Wire.begin();  
+  rtc.begin();
+
+  // Start the UV sensor
+  if (! uv.begin()) {
+    Serial.println("Didn't find Si1145");
+    while (1);
+  }
+
+
+  // Type in a time a few seconds in the future and hit upload to set it
+  // Then comment this line out and re-upload the program (if the board remains powered, the RTC will hold the date/time)
+//  // Set the time (H, M, S)
+//    rtc.setTime(20, 14, 0);  
+//  // Set the date (D, M, Y) 
+//    rtc.setDate(19, 1, 18);    
+ 
   // connect at 115200 so we can read the GPS fast enough and echo without dropping chars
   // also spit it out
   Serial.begin(115200);
@@ -75,8 +104,10 @@ void setup() {
       Serial.print("Writing to ");
       Serial.println(filename);
       break;
-    }
+    }    
   }
+
+  
 }
 
 
@@ -93,28 +124,42 @@ void loop() {
     Serial.println(filename);
     error(3);
   }
-
-
-
-
   
   // LED on
   digitalWrite(greenLED, HIGH);
 
 
-  // write reading to file on SD card and serial monitor
-  logfile.print("A0 = "); logfile.println(analogRead(photocellPin));
-  Serial.print("A0 = "); Serial.println(analogRead(photocellPin));
+  // write timestamp to file on SD card (and serial monitor)
+  logfile.print(rtc.getDay()); logfile.print("/"); logfile.print(rtc.getMonth()); logfile.print("/"); logfile.print(rtc.getYear());
+  logfile.print("\t");    
+  logfile.print(rtc.getHours()); logfile.print(":"); logfile.print(rtc.getMinutes()); logfile.print(":"); logfile.print(rtc.getSeconds());
+  logfile.print(", ");
 
+  if (ECHO_TO_SERIAL){
+    Serial.print(rtc.getDay()); Serial.print("/"); Serial.print(rtc.getMonth()); Serial.print("/"); Serial.print(rtc.getYear());
+    Serial.print("\t");
+    Serial.print(rtc.getHours()); Serial.print(":"); Serial.print(rtc.getMinutes()); Serial.print(":"); Serial.print(rtc.getSeconds());
+    Serial.print(", ");
+  }
+
+
+  // calculate uv index 
+  float UVindex = uv.readUV();
+  UVindex /= 100.0; 
+  
+  // write uv index to file on SD card (and serial monitor)
+  logfile.print("UV: ");  logfile.println(UVindex); 
+  if (ECHO_TO_SERIAL){
+    Serial.print("UV: ");  Serial.println(UVindex);
+  }
 
   // LED off
   digitalWrite(greenLED, LOW);
 
-
-  // 100 ms delay between readings
-  delay(1000);
-
-
   // close the file ensuring that written data is physically saved to the SD card
   logfile.close();
+
+  // delay between readings
+  delay(LOG_INTERVAL);
+  
 }
