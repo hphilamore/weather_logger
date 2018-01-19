@@ -100,14 +100,32 @@ void setup() {
 
     
     // ...stop when an unused filename is reached
-    if (! SD.exists(filename)) {
-      Serial.print("Writing to ");
-      Serial.println(filename);
+    if (! SD.exists(filename)){
       break;
     }    
   }
-
   
+  Serial.print("Writing to ");
+  Serial.println(filename);
+
+  // Column headings for output files
+  logfile = SD.open(filename, FILE_WRITE);
+  logfile.print("Date");
+  logfile.print("\t");    
+  logfile.print("Time");
+  logfile.print("\t");
+  logfile.print("UV_index");
+  logfile.println("\t");
+  logfile.close();
+
+  if (ECHO_TO_SERIAL){
+    Serial.print("Date");
+    Serial.print("\t");    
+    Serial.print("Time");
+    Serial.print("\t");
+    Serial.print("UV_index");
+    Serial.println("\t");
+  }
 }
 
 
@@ -133,13 +151,13 @@ void loop() {
   logfile.print(rtc.getDay()); logfile.print("/"); logfile.print(rtc.getMonth()); logfile.print("/"); logfile.print(rtc.getYear());
   logfile.print("\t");    
   logfile.print(rtc.getHours()); logfile.print(":"); logfile.print(rtc.getMinutes()); logfile.print(":"); logfile.print(rtc.getSeconds());
-  logfile.print(", ");
+  logfile.print("\t");
 
   if (ECHO_TO_SERIAL){
     Serial.print(rtc.getDay()); Serial.print("/"); Serial.print(rtc.getMonth()); Serial.print("/"); Serial.print(rtc.getYear());
     Serial.print("\t");
     Serial.print(rtc.getHours()); Serial.print(":"); Serial.print(rtc.getMinutes()); Serial.print(":"); Serial.print(rtc.getSeconds());
-    Serial.print(", ");
+    Serial.print("\t");
   }
 
 
@@ -148,9 +166,9 @@ void loop() {
   UVindex /= 100.0; 
   
   // write uv index to file on SD card (and serial monitor)
-  logfile.print("UV: ");  logfile.println(UVindex); 
+  logfile.println(UVindex); 
   if (ECHO_TO_SERIAL){
-    Serial.print("UV: ");  Serial.println(UVindex);
+    Serial.println(UVindex);
   }
 
   // LED off
