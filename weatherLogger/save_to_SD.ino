@@ -20,15 +20,33 @@ void column_headings_to_SD(){
 
   // UV index
   logfile.print("UV_index"); 
-  logfile.println("\t");
+  logfile.print("\t");
   if (ECHO_TO_SERIAL){  
     Serial.print("UV_index");
-    Serial.println("\t");
+    Serial.print("\t");
+  }
+ 
+  // windspeed
+  logfile.print("windspeed"); 
+  logfile.print("\t");
+  if (ECHO_TO_SERIAL){  
+    Serial.print("windspeed");
+    Serial.print("\t");
+  }
+
+
+
+  logfile.print("\n");
+  if (ECHO_TO_SERIAL){  
+    Serial.print("\n");
   }
 
   // close the file ensuring that written data is physically saved to the SD card
   logfile.close();
 }
+
+
+
 
 
 
@@ -63,9 +81,25 @@ void save_to_SD(){
 
 
   // write uv index to file on SD card (and serial monitor)
-  logfile.println(UVindex); 
+  logfile.print(UVindex); 
+  logfile.print("\t");
   if (ECHO_TO_SERIAL){
-    Serial.println(UVindex);
+    Serial.print(UVindex);
+    Serial.print("\t");
+  }
+
+
+  // write windspeed to file on SD card (and serial monitor)
+  logfile.print(windspeed); 
+  logfile.print("\t");
+  if (ECHO_TO_SERIAL){
+    Serial.print(windspeed);
+    Serial.print("\t");
+  }
+  
+  logfile.print("\n");
+  if (ECHO_TO_SERIAL){  
+    Serial.print("\n");
   }
 
 
