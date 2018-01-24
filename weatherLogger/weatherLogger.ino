@@ -4,7 +4,6 @@
 #include <RTCZero.h>
 #include "UV_lightmeter_setup.h"
 #include "anemometer_setup.h"
-#include "wind_direction_setup.h"
 
 #define cardSelect 4            // pin used for SD card
 #define LOG_INTERVAL 1000       // mills between entries
@@ -12,10 +11,6 @@
 #define redLED 13
 #define greenLED 8
 #include "error_LED_signal.h"
-
-#if defined(ARDUINO_SAMD_ZERO) && defined(SERIAL_PORT_USBVIRTUAL)
-#define Serial SERIAL_PORT_USBVIRTUAL
-#endif
 
 
 char filename[15];            // create text array with desired number of characters
@@ -29,14 +24,10 @@ int set_RTC_date_time = 1;
 int D = 23, M = 1, Y = 18;
 int h = 16, m = 42, s = 0; 
 
-bool first_loop = true;            // operations to be carried out the first time the program loops only
-unsigned long T_start;
-unsigned long timer;
 
 void setup() {
   // 115200 to read the GPS fast enough and echo without dropping chars
   Serial.begin(115200);
-  Serial.print("hola!");
   
   // Start the RTC
   Wire.begin();  
@@ -85,32 +76,18 @@ void setup() {
   column_headings_to_SD();
 
   // comment out if ot using anemometer
-  pinMode(anemometer_pin, INPUT);
-  attachInterrupt(digitalPinToInterrupt(anemometer_pin), rotations, RISING);
-
-  timer = millis();
+  pinMode(9, INPUT);
+  attachInterrupt(digitalPinToInterrupt(9), rotations, RISING);
 }
 
 
 uint8_t i=0;
 
-
-
-
 void loop() {
 
-  if (first_loop == true){
-    T_start = millis();
-    Serial.println(T_start);
-  }
-    
-  Serial.println(millis());
-  
   readUVindex();
 
-  wind_speed();  
-
-  wind_direction();
+  wind_speed();
   
   
   // LED on to show device is on
@@ -125,9 +102,7 @@ void loop() {
   // delay between readings
   delay(LOG_INTERVAL);
 
-  // stops operations to be carried out in the first loop only
-  first_loop = false;
-  
+  //Serial.println(anemometer_count);
  } 
 
 

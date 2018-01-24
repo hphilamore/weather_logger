@@ -13,11 +13,9 @@ void column_headings_to_SD(){
     errorLED(3);
   }
   
-  logfile.print("Date"); logfile.print("\t"); logfile.print("Time"); 
-  logfile.print("\t");
+  logfile.print("Date"); logfile.print("\t"); logfile.print("Time"); logfile.print("\t");
   if (ECHO_TO_SERIAL){
-    Serial.print("Date"); Serial.print("\t"); Serial.print("Time"); 
-    Serial.print("\t");
+    Serial.print("Date"); Serial.print("\t"); Serial.print("Time"); Serial.print("\t");
   }
 
   // UV index
@@ -29,20 +27,14 @@ void column_headings_to_SD(){
   }
  
   // windspeed
-  logfile.print("windspeed_(m/s)"); 
+  logfile.print("windspeed"); 
   logfile.print("\t");
   if (ECHO_TO_SERIAL){  
-    Serial.print("windspeed_(m/s)");
+    Serial.print("windspeed");
     Serial.print("\t");
   }
 
-  // windDirection
-  logfile.print("wind_angle(deg_from_north)"); 
-  logfile.print("\t");
-  if (ECHO_TO_SERIAL){  
-    Serial.print("wind_angle(deg_from_north)");
-    Serial.print("\t");
-  }
+
 
   logfile.print("\n");
   if (ECHO_TO_SERIAL){  
@@ -102,14 +94,6 @@ void save_to_SD(){
   logfile.print("\t");
   if (ECHO_TO_SERIAL){
     Serial.print(windspeed);
-    Serial.print("\t");
-  }
-
-  // write windspeed to file on SD card (and serial monitor)
-  logfile.print(windDirection); 
-  logfile.print("\t");
-  if (ECHO_TO_SERIAL){
-    Serial.print(windDirection);
     Serial.print("\t");
   }
   
